@@ -12,7 +12,6 @@ body {
   text-align: center;
   padding: 40px;
   overflow-x: hidden;
-  transition: transform 3s ease;
 }
 
 .container {
@@ -65,7 +64,6 @@ body {
 </div>
 
 <script>
-// Annual global estimates
 const alcoholPerYear = 3000000;
 const smokingPerYear = 8000000;
 const drugPerYear = 600000;
@@ -75,6 +73,7 @@ const secondsInYear = 31536000;
 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
 
 let suicideOffset = 0;
+let eventActive = false;
 
 function updateCounts() {
   const now = Date.now();
@@ -101,28 +100,50 @@ function updateCounts() {
 updateCounts();
 setInterval(updateCounts, 1000);
 
-// Rare event logic
 function triggerRareEvent() {
-  const suicideCard = document.getElementById("suicideCard");
+  if (eventActive) return;
+  eventActive = true;
 
+  const suicideCard = document.getElementById("suicideCard");
   suicideCard.classList.add("zoom-focus");
 
   setTimeout(() => {
-    suicideOffset -= 1; // remove one
+    suicideOffset -= 1;
     updateCounts();
   }, 2500);
 
   setTimeout(() => {
     suicideCard.classList.remove("zoom-focus");
+    eventActive = false;
   }, 5000);
 }
 
-// Check every 10 seconds with very low probability (~1% each check)
+// Random trigger (1% every 10s)
 setInterval(() => {
   if (Math.random() < 0.01) {
     triggerRareEvent();
   }
 }, 10000);
+
+// WASD simultaneous trigger
+const keysPressed = {};
+
+document.addEventListener("keydown", (e) => {
+  keysPressed[e.key.toLowerCase()] = true;
+
+  if (
+    keysPressed["w"] &&
+    keysPressed["a"] &&
+    keysPressed["s"] &&
+    keysPressed["d"]
+  ) {
+    triggerRareEvent();
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  keysPressed[e.key.toLowerCase()] = false;
+});
 </script>
 
 </body>
