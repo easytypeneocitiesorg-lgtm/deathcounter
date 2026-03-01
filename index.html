@@ -11,7 +11,10 @@ body {
   color: white;
   text-align: center;
   padding: 40px;
+  overflow-x: hidden;
+  transition: transform 3s ease;
 }
+
 .container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -19,15 +22,22 @@ body {
   max-width: 900px;
   margin: auto;
 }
+
 .card {
   background: #1e1e1e;
   padding: 25px;
   border-radius: 12px;
+  transition: transform 3s ease;
 }
+
 .number {
   font-size: 2em;
   margin-top: 10px;
   color: #ff4c4c;
+}
+
+.zoom-focus {
+  transform: scale(1.8);
 }
 </style>
 </head>
@@ -48,14 +58,14 @@ body {
     <h2>Drug Overdoses</h2>
     <div class="number" id="drugs">0</div>
   </div>
-  <div class="card">
+  <div class="card" id="suicideCard">
     <h2>Suicide</h2>
     <div class="number" id="suicide">0</div>
   </div>
 </div>
 
 <script>
-// Annual global estimates (WHO-based approximations)
+// Annual global estimates
 const alcoholPerYear = 3000000;
 const smokingPerYear = 8000000;
 const drugPerYear = 600000;
@@ -64,23 +74,55 @@ const suicidePerYear = 800000;
 const secondsInYear = 31536000;
 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime();
 
+let suicideOffset = 0;
+
 function updateCounts() {
   const now = Date.now();
   const secondsElapsed = (now - startOfYear) / 1000;
 
   function calculate(perYear) {
-    return Math.floor((perYear / secondsInYear) * secondsElapsed)
-      .toLocaleString();
+    return Math.floor((perYear / secondsInYear) * secondsElapsed);
   }
 
-  document.getElementById("alcohol").innerText = calculate(alcoholPerYear);
-  document.getElementById("smoking").innerText = calculate(smokingPerYear);
-  document.getElementById("drugs").innerText = calculate(drugPerYear);
-  document.getElementById("suicide").innerText = calculate(suicidePerYear);
+  document.getElementById("alcohol").innerText =
+    calculate(alcoholPerYear).toLocaleString();
+
+  document.getElementById("smoking").innerText =
+    calculate(smokingPerYear).toLocaleString();
+
+  document.getElementById("drugs").innerText =
+    calculate(drugPerYear).toLocaleString();
+
+  const suicideValue = calculate(suicidePerYear) + suicideOffset;
+  document.getElementById("suicide").innerText =
+    suicideValue.toLocaleString();
 }
 
 updateCounts();
 setInterval(updateCounts, 1000);
+
+// Rare event logic
+function triggerRareEvent() {
+  const suicideCard = document.getElementById("suicideCard");
+
+  suicideCard.classList.add("zoom-focus");
+
+  setTimeout(() => {
+    suicideOffset -= 1; // remove one
+    updateCounts();
+  }, 2500);
+
+  setTimeout(() => {
+    suicideCard.classList.remove("zoom-focus");
+  }, 5000);
+}
+
+// Check every 10 seconds with very low probability (~1% each check)
+setInterval(() => {
+  if (Math.random() < 0.01) {
+    triggerRareEvent();
+  }
+}, 10000);
 </script>
 
 </body>
